@@ -3,6 +3,7 @@ import 'package:lab1/model/task_handler.dart';
 import 'package:lab1/pages/add_view.dart';
 import 'package:lab1/widgets/status_icon.dart';
 import 'package:provider/provider.dart';
+import 'package:lab1/model/types.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       // The starting page of the app
       home: const MainView(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -38,9 +40,9 @@ class MainView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Things todo'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        ),
+            title: const Text('Things todo'),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            actions: _actions(context)),
         body: const TaskList(),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -63,7 +65,7 @@ class TaskList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var taskHandler = context.watch<TaskHandler>();
-    var tasks = taskHandler.testTasks();
+    var tasks = taskHandler.activeTasks;
 
     return ListView(children: [
       for (final task in tasks)
@@ -82,4 +84,27 @@ class TaskList extends StatelessWidget {
         )
     ]);
   }
+}
+
+List<Widget> _actions(context) {
+  return [_filterMenu(context)];
+}
+
+Widget _filterMenu(context) {
+  var taskHandler = Provider.of<TaskHandler>(context, listen: false);
+
+  return PopupMenuButton<FilterType>(
+    initialValue: taskHandler.mode,
+    onSelected: (FilterType item) {
+      taskHandler.setMode(item);
+    },
+    itemBuilder: (BuildContext context) => [
+      const PopupMenuItem<FilterType>(
+          value: FilterType.all, child: Text('All')),
+      const PopupMenuItem<FilterType>(
+          value: FilterType.done, child: Text('Done')),
+      const PopupMenuItem<FilterType>(
+          value: FilterType.undone, child: Text('Undone')),
+    ],
+  );
 }
