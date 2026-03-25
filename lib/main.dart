@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lab1/model/task_handler.dart';
+import 'package:lab1/pages/add_view.dart';
+import 'package:lab1/widgets/status_icon.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -35,12 +37,23 @@ class MainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Things todo'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: const TaskList(),
-    ); // Scaffold
+        appBar: AppBar(
+          title: const Text('Things todo'),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        ),
+        body: const TaskList(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddView(),
+              ),
+            );
+          },
+          tooltip: 'Add todo',
+          child: const Icon(Icons.add),
+        )); // Scaffold
   }
 }
 
@@ -49,10 +62,24 @@ class TaskList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var taskHandler = context.watch<TaskHandler>();
+    var tasks = taskHandler.testTasks();
+
     return ListView(children: [
-      ListTile(title: Text('DAT216/TIG091')),
-      ListTile(title: Text('Lab1 Todos')),
-      ListTile(title: Text('En rad till')),
+      for (final task in tasks)
+        ListTile(
+          leading: StatusIcon(task),
+          title: Text(task.title),
+          onTap: () {
+            taskHandler.toggleTask(task);
+          },
+          trailing: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              taskHandler.deleteTask(task);
+            },
+          ),
+        )
     ]);
   }
 }
